@@ -15,7 +15,7 @@
       "prefix": "micro-app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "ngx-build-plus:build",
           "options": {
             "outputPath": "dist/micro-app-two",
             "index": "src/index.html",
