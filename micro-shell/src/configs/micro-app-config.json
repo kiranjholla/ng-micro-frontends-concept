@@ -4,7 +4,7 @@
     "appRoute": "one",
     "appName": "Fictional World",
     "styles": ["styles.09e2c710755c8867a460.css"],
-    "moduleScriptPaths": [
+    "scripts": [
       "polyfills.f19bb1699c25986cf4af.js",
       "main.5c230843b09ab25fbaef.js"
     ]
@@ -14,7 +14,7 @@
     "appRoute": "two",
     "appName": "Real World",
     "styles":["styles.09e2c710755c8867a460.css"],
-    "moduleScriptPaths": [
+    "scripts": [
       "polyfills.f19bb1699c25986cf4af.js",
       "main.6950031aad9036e70e25.js"
     ]

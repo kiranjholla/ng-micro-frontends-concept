@@ -16,6 +16,7 @@ export class ShellContainer implements AfterViewInit {
 
   private readonly microAppConfig;
   private readonly microAppRoutes: Routes = [];
+  private readonly loadedScripts: { [key: string]: boolean } = {};
 
   constructor(microAppConfigService: MicroAppConfigService, private readonly router: Router) {
     this.microAppConfig = microAppConfigService.getMicroAppConfig();
@@ -28,8 +29,8 @@ export class ShellContainer implements AfterViewInit {
       if (this.appContainer) {
         microApps.forEach(elementName => {
           this.loadMicroApp(elementName, this.microAppConfig[elementName]);
-          this.router.resetConfig([...HOME_ROUTES, ...this.microAppRoutes, ...ERROR_ROUTES]);
         });
+        this.router.resetConfig([...HOME_ROUTES, ...this.microAppRoutes, ...ERROR_ROUTES]);
       } else {
         console.error('The App Container has not been initialized!');
       }
@@ -37,15 +38,7 @@ export class ShellContainer implements AfterViewInit {
   }
 
   private loadMicroApp(microAppElementName: string, microAppConfig: any) {
-    const {
-      hostname = '',
-      moduleScriptPaths,
-      noModuleScriptPaths,
-      loaded,
-      appRoute,
-      appName,
-      webComponentElement = microAppElementName
-    } = microAppConfig;
+    const { hostname = '', scripts, styles, loaded, appRoute, appName, webComponentElement = microAppElementName } = microAppConfig;
 
     if (loaded) {
       return;
@@ -54,22 +47,27 @@ export class ShellContainer implements AfterViewInit {
     this.microAppLinks.push({ route: `#/${appRoute}`, name: appName });
     this.microAppRoutes.push({ path: `${appRoute}`, component: EmptyContainer });
 
-    moduleScriptPaths?.forEach(path => {
-      const scriptTag = document.createElement('script');
-      scriptTag.setAttribute('src', `${hostname}${path}`);
-      scriptTag.setAttribute('type', 'module');
-      this.appContainer.nativeElement.appendChild(scriptTag);
+    scripts?.forEach(path => {
+      if (!this.loadedScripts[path]) {
+        const scriptTag = document.createElement('script');
+        scriptTag.src = `${hostname}${path}`;
+        scriptTag.setAttribute('defer', 'defer');
+        this.appContainer.nativeElement.appendChild(scriptTag);
+        this.loadedScripts[path] = true;
+      }
     });
 
-    noModuleScriptPaths?.forEach(path => {
-      const scriptTag = document.createElement('script');
-      scriptTag.setAttribute('src', `${hostname}${path}`);
-      scriptTag.setAttribute('defer', 'defer');
-      scriptTag.setAttribute('nomodule', '');
-      this.appContainer.nativeElement.appendChild(scriptTag);
+    styles?.forEach(style => {
+      if (!this.loadedScripts[style]) {
+        const styleTag = document.createElement('link');
+        styleTag.href = `${hostname}${style}`;
+        styleTag.rel = 'stylesheet';
+        document.head.appendChild(styleTag);
+        this.loadedScripts[style] = true;
+      }
     });
 
-    if (moduleScriptPaths?.length || noModuleScriptPaths?.length) {
+    if (scripts?.length) {
       const domWCElement = document.createElement(webComponentElement);
       this.appContainer.nativeElement.appendChild(domWCElement);
       microAppConfig.loaded = true;
